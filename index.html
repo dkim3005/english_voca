@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중학 필수 영단어</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .card-flip {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-600">중학 필수 영단어 1250</h1>
+            <p class="text-lg text-gray-600 mt-2">Day별로 단어를 학습하고 테스트를 통해 실력을 확인해보세요.</p>
+        </header>
+
+        <main id="main-content">
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h2 class="text-2xl font-semibold mb-4">학습할 Day를 선택하세요</h2>
+                <div id="day-selector" class="grid grid-cols-5 sm:grid-cols-10 gap-2"></div>
+            </div>
+
+            <div id="word-section" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="word-list-title" class="text-2xl font-semibold"></h2>
+                    <button id="start-test-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+                        테스트 시작
+                    </button>
+                </div>
+                <div id="word-list" class="grid md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto p-4 bg-white rounded-xl shadow-md"></div>
+            </div>
+        </main>
+
+        <div id="test-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-6 sm:p-8 relative">
+                <div id="test-content">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 id="test-title" class="text-2xl font-bold text-blue-600">단어 테스트</h2>
+                            <p class="text-gray-600">30문제에 대한 답을 모두 입력하고 채점하세요.</p>
+                        </div>
+                        <button id="close-test-btn" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+                    </div>
+                    <div id="test-form-container" class="space-y-3 max-h-[60vh] overflow-y-auto p-2 border-t border-b py-4"></div>
+                    <div class="mt-6 text-center">
+                        <button id="grade-test-btn" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg">
+                            채점하기
+                        </button>
+                    </div>
+                </div>
+
+                <div id="result-content" class="hidden text-center">
+                     <h2 class="text-3xl font-bold text-blue-600 mb-4">테스트 결과</h2>
+                     <p class="text-5xl font-extrabold mb-2" id="score-display"></p>
+                     <p class="text-lg text-gray-500 mb-6" id="score-message"></p>
+                     <div id="send-result-section" class="mt-6 p-4 bg-gray-100 border-l-4 border-gray-500 rounded-r-lg">
+                        <p class="font-semibold text-gray-800">수고하셨습니다! 선생님께 결과를 전송하세요.</p>
+                        <button id="send-result-btn" class="mt-3 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:bg-gray-400">
+                            결과 전송하기
+                        </button>
+                     </div>
+                     <button id="close-result-btn" class="mt-8 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg">
+                         다시 학습하기
+                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================================================================
+        // ★★★ 선생님 설정 영역 ★★★
+        // 1단계에서 복사한 웹 앱 URL을 아래 따옴표 안에 붙여넣으세요.
+        const SCRIPT_URL = "여기에_선생님이_받은_URL을_붙여넣으세요";
+        // ==================================================================
+
+        const originalVocabulary = [
+            // Day 1
+            [
+                { "word": "ability", "meaning": "능력" }, { "word": "abroad", "meaning": "해외에" },
+                { "word": "absence", "meaning": "결석, 부재" }, { "word": "accept", "meaning": "받아들이다" },
+                { "word": "accident", "meaning": "사고" }, { "word": "achieve", "meaning": "성취하다" },
+                { "word": "across", "meaning": "~을 가로질러" }, { "word": "activity", "meaning": "활동" },
+                { "word": "actor", "meaning": "배우" }, { "word": "actually", "meaning": "실제로" },
+                { "word": "add", "meaning": "더하다" }, { "word": "address", "meaning": "주소, 연설하다" },
+                { "word": "admire", "meaning": "존경하다" }, { "word": "adult", "meaning": "성인" },
+                { "word": "advantage", "meaning": "이점" }, { "word": "adventure", "meaning": "모험" },
+                { "word": "advice", "meaning": "조언" }, { "word": "affect", "meaning": "영향을 미치다" },
+                { "word": "afraid", "meaning": "두려워하는" }, { "word": "agree", "meaning": "동의하다" },
+                { "word": "ahead", "meaning": "앞에" }, { "word": "aim", "meaning": "목표, 조준하다" },
+                { "word": "allow", "meaning": "허락하다" }, { "word": "almost", "meaning": "거의" },
+                { "word": "alone", "meaning": "혼자" }, { "word": "along", "meaning": "~을 따라서" },
+                { "word": "already", "meaning": "이미, 벌써" }, { "word": "although", "meaning": "비록 ~일지라도" },
+                { "word": "amazing", "meaning": "놀라운" }, { "word": "among", "meaning": "~사이에" },
+                { "word": "amount", "meaning": "양" }, { "word": "ancient", "meaning": "고대의" },
+                { "word": "angry", "meaning": "화난" }, { "word": "another", "meaning": "또 다른" },
+                { "word": "answer", "meaning": "대답" }, { "word": "anxious", "meaning": "걱정하는" },
+                { "word": "appear", "meaning": "나타나다" }, { "word": "argue", "meaning": "논쟁하다" },
+                { "word": "around", "meaning": "주위에" }, { "word": "arrive", "meaning": "도착하다" },
+                { "word": "artist", "meaning": "예술가" }, { "word": "asleep", "meaning": "잠든" },
+                { "word": "attack", "meaning": "공격하다" }, { "word": "attend", "meaning": "참석하다" },
+                { "word": "attention", "meaning": "주의" }, { "word": "audience", "meaning": "청중" },
+                { "word": "avoid", "meaning": "피하다" }, { "word": "award", "meaning": "상" }
+            ],
+            // Day 2
+            [
+                { "word": "balance", "meaning": "균형" }, { "word": "balloon", "meaning": "풍선" },
+                { "word": "band", "meaning": "밴드" }, { "word": "bank", "meaning": "은행" },
+                { "word": "base", "meaning": "기초" }, { "word": "basic", "meaning": "기본적인" },
+                { "word": "battle", "meaning": "전투" }, { "word": "beach", "meaning": "해변" },
+                { "word": "bear", "meaning": "참다, 곰" }, { "word": "beautiful", "meaning": "아름다운" },
+                { "word": "become", "meaning": "~이 되다" }, { "word": "begin", "meaning": "시작하다" },
+                { "word": "behave", "meaning": "행동하다" }, { "word": "behind", "meaning": "~뒤에" },
+                { "word": "believe", "meaning": "믿다" }, { "word": "belong", "meaning": "속하다" },
+                { "word": "below", "meaning": "아래에" }, { "word": "beside", "meaning": "~옆에" },
+                { "word": "between", "meaning": "~사이에" }, { "word": "beyond", "meaning": "~을 넘어서" },
+                { "word": "billion", "meaning": "10억" }, { "word": "birth", "meaning": "탄생" },
+                { "word": "blind", "meaning": "눈이 먼" }, { "word": "block", "meaning": "막다, 블록" },
+                { "word": "blood", "meaning": "피" }, { "word": "board", "meaning": "판자, 탑승하다" },
+                { "word": "boil", "meaning": "끓다" }, { "word": "bomb", "meaning": "폭탄" },
+                { "word": "bone", "meaning": "뼈" }, { "word": "borrow", "meaning": "빌리다" },
+                { "word": "bother", "meaning": "괴롭히다" }, { "word": "bottom", "meaning": "바닥" },
+                { "word": "brain", "meaning": "뇌" }, { "word": "brave", "meaning": "용감한" },
+                { "word": "break", "meaning": "깨뜨리다" }, { "word": "breakfast", "meaning": "아침식사" },
+                { "word": "breathe", "meaning": "숨쉬다" }, { "word": "bridge", "meaning": "다리" },
+                { "word": "bright", "meaning": "밝은" }, { "word": "bring", "meaning": "가져오다" },
+                { "word": "broadcast", "meaning": "방송하다" }, { "word": "build", "meaning": "짓다" },
+                { "word": "burn", "meaning": "타다" }, { "word": "business", "meaning": "사업" },
+                { "word": "busy", "meaning": "바쁜" }, { "word": "button", "meaning": "버튼" },
+                { "word": "buy", "meaning": "사다" }, { "word": "calendar", "meaning": "달력" }
+            ],
+            // Day 3
+            [
+                { "word": "call", "meaning": "전화하다" }, { "word": "camera", "meaning": "카메라" },
+                { "word": "camp", "meaning": "캠프" }, { "word": "cancel", "meaning": "취소하다" },
+                { "word": "cancer", "meaning": "암" }, { "word": "candidate", "meaning": "후보자" },
+                { "word": "capital", "meaning": "수도, 자본" }, { "word": "captain", "meaning": "주장, 선장" },
+                { "word": "care", "meaning": "돌봄" }, { "word": "careful", "meaning": "조심스러운" },
+                { "word": "carry", "meaning": "나르다" }, { "word": "case", "meaning": "경우, 사건" },
+                { "word": "catch", "meaning": "잡다" }, { "word": "cause", "meaning": "원인" },
+                { "word": "celebrate", "meaning": "축하하다" }, { "word": "center", "meaning": "중심" },
+                { "word": "century", "meaning": "세기" }, { "word": "certain", "meaning": "확실한" },
+                { "word": "challenge", "meaning": "도전" }, { "word": "chance", "meaning": "기회" },
+                { "word": "change", "meaning": "바꾸다" }, { "word": "character", "meaning": "성격, 등장인물" },
+                { "word": "charge", "meaning": "요금, 책임" }, { "word": "cheap", "meaning": "값싼" },
+                { "word": "check", "meaning": "확인하다" }, { "word": "cheer", "meaning": "응원하다" },
+                { "word": "chemical", "meaning": "화학의" }, { "word": "choice", "meaning": "선택" },
+                { "word": "choose", "meaning": "선택하다" }, { "word": "circle", "meaning": "원" },
+                { "word": "citizen", "meaning": "시민" }, { "word": "class", "meaning": "수업, 계급" },
+                { "word": "classic", "meaning": "고전의" }, { "word": "clean", "meaning": "깨끗한" },
+                { "word": "clear", "meaning": "명확한" }, { "word": "clever", "meaning": "영리한" },
+                { "word": "climate", "meaning": "기후" }, { "word": "climb", "meaning": "오르다" },
+                { "word": "close", "meaning": "닫다, 가까운" }, { "word": "cloud", "meaning": "구름" },
+                { "word": "club", "meaning": "클럽" }, { "word": "coach", "meaning": "코치" },
+                { "word": "collect", "meaning": "모으다" }, { "word": "color", "meaning": "색깔" },
+                { "word": "comfortable", "meaning": "편안한" }, { "word": "common", "meaning": "흔한, 공통의" },
+                { "word": "communicate", "meaning": "의사소통하다" }, { "word": "community", "meaning": "공동체" }
+            ],
+            // Day 4
+            [
+                { "word": "company", "meaning": "회사" }, { "word": "compare", "meaning": "비교하다" },
+                { "word": "compete", "meaning": "경쟁하다" }, { "word": "complain", "meaning": "불평하다" },
+                { "word": "complete", "meaning": "완성하다" }, { "word": "computer", "meaning": "컴퓨터" },
+                { "word": "concentrate", "meaning": "집중하다" }, { "word": "concern", "meaning": "걱정, 관심사" },
+                { "word": "condition", "meaning": "상태, 조건" }, { "word": "connect", "meaning": "연결하다" },
+                { "word": "consider", "meaning": "고려하다" }, { "word": "contain", "meaning": "포함하다" },
+                { "word": "continue", "meaning": "계속하다" }, { "word": "control", "meaning": "통제하다" },
+                { "word": "convenient", "meaning": "편리한" }, { "word": "conversation", "meaning": "대화" },
+                { "word": "cook", "meaning": "요리하다" }, { "word": "cool", "meaning": "시원한, 멋진" },
+                { "word": "copy", "meaning": "복사하다" }, { "word": "corner", "meaning": "모퉁이" },
+                { "word": "correct", "meaning": "옳은, 수정하다" }, { "word": "cost", "meaning": "비용" },
+                { "word": "cotton", "meaning": "솜, 면" }, { "word": "cough", "meaning": "기침" },
+                { "word": "count", "meaning": "세다" }, { "word": "country", "meaning": "나라, 시골" },
+                { "word": "couple", "meaning": "한 쌍" }, { "word": "courage", "meaning": "용기" },
+                { "word": "course", "meaning": "과정, 강좌" }, { "word": "cover", "meaning": "덮다" },
+                { "word": "cow", "meaning": "암소" }, { "word": "crash", "meaning": "충돌하다" },
+                { "word": "create", "meaning": "창조하다" }, { "word": "creative", "meaning": "창의적인" },
+                { "word": "credit", "meaning": "신용" }, { "word": "crime", "meaning": "범죄" },
+                { "word": "crisis", "meaning": "위기" }, { "word": "criticize", "meaning": "비판하다" },
+                { "word": "crop", "meaning": "농작물" }, { "word": "cross", "meaning": "건너다" },
+                { "word": "crowd", "meaning": "군중" }, { "word": "cruel", "meaning": "잔인한" },
+                { "word": "cry", "meaning": "울다" }, { "word": "culture", "meaning": "문화" },
+                { "word": "cup", "meaning": "컵" }, { "word": "cure", "meaning": "치료하다" },
+                { "word": "curious", "meaning": "호기심이 많은" }, { "word": "customer", "meaning": "고객" }
+            ],
+            // Day 5
+            [
+                { "word": "daily", "meaning": "매일의" }, { "word": "damage", "meaning": "손상" },
+                { "word": "dance", "meaning": "춤추다" }, { "word": "danger", "meaning": "위험" },
+                { "word": "dark", "meaning": "어두운" }, { "word": "date", "meaning": "날짜, 데이트" },
+                { "word": "dead", "meaning": "죽은" }, { "word": "deal", "meaning": "거래하다, 다루다" },
+                { "word": "death", "meaning": "죽음" }, { "word": "debate", "meaning": "토론" },
+                { "word": "decide", "meaning": "결정하다" }, { "word": "decision", "meaning": "결정" },
+                { "word": "deep", "meaning": "깊은" }, { "word": "degree", "meaning": "정도, 학위" },
+                { "word": "delicious", "meaning": "맛있는" }, { "word": "deliver", "meaning": "배달하다" },
+                { "word": "demand", "meaning": "요구하다" }, { "word": "dentist", "meaning": "치과의사" },
+                { "word": "depend", "meaning": "의존하다" }, { "word": "describe", "meaning": "묘사하다" },
+                { "word": "desert", "meaning": "사막" }, { "word": "design", "meaning": "디자인하다" },
+                { "word": "desire", "meaning": "욕구, 바라다" }, { "word": "desk", "meaning": "책상" },
+                { "word": "destroy", "meaning": "파괴하다" }, { "word": "develop", "meaning": "개발하다" },
+                { "word": "development", "meaning": "개발, 발전" }, { "word": "dialog", "meaning": "대화" },
+                { "word": "dictionary", "meaning": "사전" }, { "word": "die", "meaning": "죽다" },
+                { "word": "diet", "meaning": "식단" }, { "word": "different", "meaning": "다른" },
+                { "word": "difficult", "meaning": "어려운" }, { "word": "difficulty", "meaning": "어려움" },
+                { "word": "direct", "meaning": "직접적인, 지시하다" }, { "word": "direction", "meaning": "방향" },
+                { "word": "discover", "meaning": "발견하다" }, { "word": "discuss", "meaning": "토론하다" },
+                { "word": "disease", "meaning": "질병" }, { "word": "dish", "meaning": "접시, 요리" },
+                { "word": "distance", "meaning": "거리" }, { "word": "divide", "meaning": "나누다" },
+                { "word": "doctor", "meaning": "의사" }, { "word": "document", "meaning": "문서" },
+                { "word": "dollar", "meaning": "달러" }, { "word": "double", "meaning": "두 배의" },
+                { "word": "doubt", "meaning": "의심" }, { "word": "download", "meaning": "다운로드하다" }
+            ],
+            // Day 6
+            [
+                { "word": "drama", "meaning": "드라마, 연극" }, { "word": "draw", "meaning": "그리다, 끌다" },
+                { "word": "dream", "meaning": "꿈" }, { "word": "dress", "meaning": "드레스, 옷을 입다" },
+                { "word": "drink", "meaning": "마시다" }, { "word": "drive", "meaning": "운전하다" },
+                { "word": "drop", "meaning": "떨어뜨리다" }, { "word": "drug", "meaning": "약" },
+                { "word": "dry", "meaning": "마른" }, { "word": "during", "meaning": "~동안" },
+                { "word": "duty", "meaning": "의무" }, { "word": "each", "meaning": "각각의" },
+                { "word": "early", "meaning": "일찍" }, { "word": "earn", "meaning": "벌다" },
+                { "word": "earth", "meaning": "지구" }, { "word": "easily", "meaning": "쉽게" },
+                { "word": "east", "meaning": "동쪽" }, { "word": "easy", "meaning": "쉬운" },
+                { "word": "eat", "meaning": "먹다" }, { "word": "economy", "meaning": "경제" },
+                { "word": "edge", "meaning": "가장자리" }, { "word": "education", "meaning": "교육" },
+                { "word": "effect", "meaning": "효과, 영향" }, { "word": "effective", "meaning": "효과적인" },
+                { "word": "effort", "meaning": "노력" }, { "word": "either", "meaning": "어느 한쪽" },
+                { "word": "elect", "meaning": "선출하다" }, { "word": "electric", "meaning": "전기의" },
+                { "word": "else", "meaning": "그 밖에" }, { "word": "email", "meaning": "이메일" },
+                { "word": "emotion", "meaning": "감정" }, { "word": "empty", "meaning": "빈" },
+                { "word": "encourage", "meaning": "격려하다" }, { "word": "end", "meaning": "끝" },
+                { "word": "enemy", "meaning": "적" }, { "word": "energy", "meaning": "에너지" },
+                { "word": "engine", "meaning": "엔진" }, { "word": "engineer", "meaning": "엔지니어" },
+                { "word": "enjoy", "meaning": "즐기다" }, { "word": "enough", "meaning": "충분한" },
+                { "word": "enter", "meaning": "들어가다" }, { "word": "environment", "meaning": "환경" },
+                { "word": "equal", "meaning": "동등한" }, { "word": "error", "meaning": "오류" },
+                { "word": "escape", "meaning": "탈출하다" }, { "word": "especially", "meaning": "특히" },
+                { "word": "essay", "meaning": "에세이" }, { "word": "even", "meaning": "심지어, 평평한" }
+            ],
+            // Day 7
+            [
+                { "word": "evening", "meaning": "저녁" }, { "word": "event", "meaning": "사건, 행사" },
+                { "word": "ever", "meaning": "언제나,เคย" }, { "word": "every", "meaning": "모든" },
+                { "word": "evidence", "meaning": "증거" }, { "word": "exact", "meaning": "정확한" },
+                { "word": "exam", "meaning": "시험" }, { "word": "example", "meaning": "예시" },
+                { "word": "excellent", "meaning": "훌륭한" }, { "word": "except", "meaning": "~을 제외하고" },
+                { "word": "exchange", "meaning": "교환하다" }, { "word": "excite", "meaning": "흥분시키다" },
+                { "word": "excuse", "meaning": "변명, 용서하다" }, { "word": "exercise", "meaning": "운동" },
+                { "word": "exist", "meaning": "존재하다" }, { "word": "exit", "meaning": "출구" },
+                { "word": "expect", "meaning": "기대하다" }, { "word": "expensive", "meaning": "비싼" },
+                { "word": "experience", "meaning": "경험" }, { "word": "expert", "meaning": "전문가" },
+                { "word": "explain", "meaning": "설명하다" }, { "word": "express", "meaning": "표현하다" },
+                { "word": "expression", "meaning": "표현" }, { "word": "extra", "meaning": "여분의" },
+                { "word": "extreme", "meaning": "극도의" }, { "word": "eye", "meaning": "눈" },
+                { "word": "face", "meaning": "얼굴, 직면하다" }, { "word": "fact", "meaning": "사실" },
+                { "word": "factor", "meaning": "요인" }, { "word": "factory", "meaning": "공장" },
+                { "word": "fail", "meaning": "실패하다" }, { "word": "failure", "meaning": "실패" },
+                { "word": "fair", "meaning": "공평한, 박람회" }, { "word": "fall", "meaning": "떨어지다, 가을" },
+                { "word": "false", "meaning": "거짓의" }, { "word": "familiar", "meaning": "익숙한" },
+                { "word": "family", "meaning": "가족" }, { "word": "famous", "meaning": "유명한" },
+                { "word": "fan", "meaning": "팬, 선풍기" }, { "word": "fantastic", "meaning": "환상적인" },
+                { "word": "far", "meaning": "먼" }, { "word": "farm", "meaning": "농장" },
+                { "word": "fashion", "meaning": "패션" }, { "word": "fast", "meaning": "빠른" },
+                { "word": "fat", "meaning": "지방, 뚱뚱한" }, { "word": "father", "meaning": "아버지" },
+                { "word": "fault", "meaning": "잘못" }, { "word": "favor", "meaning": "호의" }
+            ],
+            // Day 8
+            [
+                { "word": "favorite", "meaning": "가장 좋아하는" }, { "word": "fear", "meaning": "두려움" },
+                { "word": "feature", "meaning": "특징" }, { "word": "feed", "meaning": "먹이를 주다" },
+                { "word": "feel", "meaning": "느끼다" }, { "word": "feeling", "meaning": "감정" },
+                { "word": "female", "meaning": "여성의" }, { "word": "festival", "meaning": "축제" },
+                { "word": "fever", "meaning": "열" }, { "word": "few", "meaning": "소수의" },
+                { "word": "field", "meaning": "들판, 분야" }, { "word": "fight", "meaning": "싸우다" },
+                { "word": "figure", "meaning": "숫자, 인물, 도형" }, { "word": "file", "meaning": "파일" },
+                { "word": "fill", "meaning": "채우다" }, { "word": "film", "meaning": "영화" },
+                { "word": "final", "meaning": "마지막의" }, { "word": "finally", "meaning": "마침내" },
+                { "word": "find", "meaning": "찾다" }, { "word": "fine", "meaning": "좋은, 벌금" },
+                { "word": "finger", "meaning": "손가락" }, { "word": "finish", "meaning": "끝내다" },
+                { "word": "fire", "meaning": "불, 해고하다" }, { "word": "firm", "meaning": "회사, 단단한" },
+                { "word": "first", "meaning": "첫 번째의" }, { "word": "fish", "meaning": "물고기" },
+                { "word": "fit", "meaning": "적합하다" }, { "word": "fix", "meaning": "고치다, 고정하다" },
+                { "word": "flag", "meaning": "깃발" }, { "word": "flat", "meaning": "평평한" },
+                { "word": "flight", "meaning": "비행" }, { "word": "float", "meaning": "뜨다" },
+                { "word": "floor", "meaning": "바닥, 층" }, { "word": "flour", "meaning": "밀가루" },
+                { "word": "flow", "meaning": "흐르다" }, { "word": "flower", "meaning": "꽃" },
+                { "word": "fly", "meaning": "날다, 파리" }, { "word": "focus", "meaning": "집중하다" },
+                { "word": "fog", "meaning": "안개" }, { "word": "follow", "meaning": "따라가다" },
+                { "word": "food", "meaning": "음식" }, { "word": "fool", "meaning": "바보" },
+                { "word": "foot", "meaning": "발" }, { "word": "force", "meaning": "힘, 강요하다" },
+                { "word": "foreign", "meaning": "외국의" }, { "word": "forest", "meaning": "숲" },
+                { "word": "forget", "meaning": "잊다" }, { "word": "forgive", "meaning": "용서하다" }
+            ],
+            // Day 9
+            [
+                { "word": "fork", "meaning": "포크" }, { "word": "form", "meaning": "형태, 형성하다" },
+                { "word": "formal", "meaning": "공식적인" }, { "word": "forward", "meaning": "앞으로" },
+                { "word": "frame", "meaning": "틀, 액자" }, { "word": "free", "meaning": "자유로운, 무료의" },
+                { "word": "freedom", "meaning": "자유" }, { "word": "freeze", "meaning": "얼다" },
+                { "word": "fresh", "meaning": "신선한" }, { "word": "friend", "meaning": "친구" },
+                { "word": "friendly", "meaning": "친근한" }, { "word": "frighten", "meaning": "무서워하게 하다" },
+                { "word": "from", "meaning": "~로부터" }, { "word": "front", "meaning": "앞" },
+                { "word": "fruit", "meaning": "과일" }, { "word": "fuel", "meaning": "연료" },
+                { "word": "full", "meaning": "가득 찬" }, { "word": "fun", "meaning": "재미" },
+                { "word": "function", "meaning": "기능" }, { "word": "funny", "meaning": "재미있는" },
+                { "word": "furniture", "meaning": "가구" }, { "word": "future", "meaning": "미래" },
+                { "word": "gain", "meaning": "얻다" }, { "word": "game", "meaning": "게임" },
+                { "word": "garage", "meaning": "차고" }, { "word": "garbage", "meaning": "쓰레기" },
+                { "word": "garden", "meaning": "정원" }, { "word": "gas", "meaning": "가스" },
+                { "word": "gate", "meaning": "문" }, { "word": "gather", "meaning": "모으다" },
+                { "word": "general", "meaning": "일반적인, 장군" }, { "word": "generation", "meaning": "세대" },
+                { "word": "generous", "meaning": "관대한" }, { "word": "gentle", "meaning": "온화한" },
+                { "word": "get", "meaning": "얻다" }, { "word": "gift", "meaning": "선물" },
+                { "word": "give", "meaning": "주다" }, { "word": "glad", "meaning": "기쁜" },
+                { "word": "glass", "meaning": "유리, 잔" }, { "word": "global", "meaning": "세계적인" },
+                { "word": "glove", "meaning": "장갑" }, { "word": "glue", "meaning": "풀" },
+                { "word": "goal", "meaning": "목표" }, { "word": "god", "meaning": "신" },
+                { "word": "gold", "meaning": "금" }, { "word": "good", "meaning": "좋은" },
+                { "word": "government", "meaning": "정부" }, { "word": "grade", "meaning": "등급, 학년" }
+            ],
+            // Day 10
+            [
+                { "word": "graduate", "meaning": "졸업하다" }, { "word": "grain", "meaning": "곡물" },
+                { "word": "grammar", "meaning": "문법" }, { "word": "grand", "meaning": "웅장한" },
+                { "word": "grape", "meaning": "포도" }, { "word": "grass", "meaning": "풀" },
+                { "word": "grateful", "meaning": "감사하는" }, { "word": "great", "meaning": "위대한" },
+                { "word": "green", "meaning": "녹색" }, { "word": "greet", "meaning": "인사하다" },
+                { "word": "gray", "meaning": "회색" }, { "word": "ground", "meaning": "땅" },
+                { "word": "group", "meaning": "그룹" }, { "word": "grow", "meaning": "자라다" },
+                { "word": "guard", "meaning": "경비원, 지키다" }, { "word": "guess", "meaning": "추측하다" },
+                { "word": "guest", "meaning": "손님" }, { "word": "guide", "meaning": "안내하다" },
+                { "word": "guilty", "meaning": "유죄의" }, { "word": "guitar", "meaning": "기타" },
+                { "word": "gun", "meaning": "총" }, { "word": "habit", "meaning": "습관" },
+                { "word": "hair", "meaning": "머리카락" }, { "word": "half", "meaning": "절반" },
+                { "word": "hall", "meaning": "홀, 복도" }, { "word": "hand", "meaning": "손" },
+                { "word": "handle", "meaning": "다루다, 손잡이" }, { "word": "hang", "meaning": "걸다" },
+                { "word": "happen", "meaning": "일어나다" }, { "word": "happy", "meaning": "행복한" },
+                { "word": "hard", "meaning": "어려운, 단단한" }, { "word": "harm", "meaning": "해" },
+                { "word": "hate", "meaning": "미워하다" }, { "word": "have", "meaning": "가지다" },
+                { "word": "head", "meaning": "머리" }, { "word": "headache", "meaning": "두통" },
+                { "word": "health", "meaning": "건강" }, { "word": "healthy", "meaning": "건강한" },
+                { "word": "hear", "meaning": "듣다" }, { "word": "heart", "meaning": "심장, 마음" },
+                { "word": "heat", "meaning": "열" }, { "word": "heavy", "meaning": "무거운" },
+                { "word": "height", "meaning": "높이" }, { "word": "hello", "meaning": "안녕하세요" },
+                { "word": "help", "meaning": "돕다" }, { "word": "here", "meaning": "여기에" },
+                { "word": "hero", "meaning": "영웅" }, { "word": "hide", "meaning": "숨다" }
+            ],
+            // Day 11
+            [
+                { "word": "high", "meaning": "높은" }, { "word": "hill", "meaning": "언덕" },
+                { "word": "hint", "meaning": "힌트" }, { "word": "hire", "meaning": "고용하다" },
+                { "word": "history", "meaning": "역사" }, { "word": "hit", "meaning": "치다" },
+                { "word": "hobby", "meaning": "취미" }, { "word": "hold", "meaning": "잡다" },
+                { "word": "hole", "meaning": "구멍" }, { "word": "holiday", "meaning": "휴일" },
+                { "word": "home", "meaning": "집" }, { "word": "honest", "meaning": "정직한" },
+                { "word": "honey", "meaning": "꿀" }, { "word": "honor", "meaning": "명예" },
+                { "word": "hope", "meaning": "희망하다" }, { "word": "horrible", "meaning": "끔찍한" },
+                { "word": "horse", "meaning": "말" }, { "word": "hospital", "meaning": "병원" },
+                { "word": "host", "meaning": "주인" }, { "word": "hot", "meaning": "더운" },
+                { "word": "hotel", "meaning": "호텔" }, { "word": "hour", "meaning": "시간" },
+                { "word": "house", "meaning": "집" }, { "word": "however", "meaning": "그러나" },
+                { "word": "huge", "meaning": "거대한" }, { "word": "human", "meaning": "인간" },
+                { "word": "humor", "meaning": "유머" }, { "word": "hungry", "meaning": "배고픈" },
+                { "word": "hunt", "meaning": "사냥하다" }, { "word": "hurry", "meaning": "서두르다" },
+                { "word": "hurt", "meaning": "다치게 하다" }, { "word": "husband", "meaning": "남편" },
+                { "word": "ice", "meaning": "얼음" }, { "word": "idea", "meaning": "생각" },
+                { "word": "ideal", "meaning": "이상적인" }, { "word": "identify", "meaning": "확인하다" },
+                { "word": "ignore", "meaning": "무시하다" }, { "word": "ill", "meaning": "아픈" },
+                { "word": "image", "meaning": "이미지" }, { "word": "imagine", "meaning": "상상하다" },
+                { "word": "immediately", "meaning": "즉시" }, { "word": "important", "meaning": "중요한" },
+                { "word": "impossible", "meaning": "불가능한" }, { "word": "impress", "meaning": "감명을 주다" },
+                { "word": "improve", "meaning": "개선하다" }, { "word": "include", "meaning": "포함하다" },
+                { "word": "income", "meaning": "소득" }, { "word": "increase", "meaning": "증가하다" }
+            ],
+            // Day 12
+            [
+                { "word": "indeed", "meaning": "정말로" }, { "word": "individual", "meaning": "개인의" },
+                { "word": "industry", "meaning": "산업" }, { "word": "influence", "meaning": "영향" },
+                { "word": "inform", "meaning": "알리다" }, { "word": "information", "meaning": "정보" },
+                { "word": "ingredient", "meaning": "재료" }, { "word": "injure", "meaning": "부상을 입히다" },
+                { "word": "ink", "meaning": "잉크" }, { "word": "insect", "meaning": "곤충" },
+                { "word": "inside", "meaning": "안에" }, { "word": "insist", "meaning": "주장하다" },
+                { "word": "instead", "meaning": "대신에" }, { "word": "instrument", "meaning": "악기, 도구" },
+                { "word": "interest", "meaning": "관심, 이자" }, { "word": "international", "meaning": "국제적인" },
+                { "word": "internet", "meaning": "인터넷" }, { "word": "interview", "meaning": "인터뷰" },
+                { "word": "introduce", "meaning": "소개하다" }, { "word": "invent", "meaning": "발명하다" },
+                { "word": "invitation", "meaning": "초대" }, { "word": "invite", "meaning": "초대하다" },
+                { "word": "iron", "meaning": "철, 다리미" }, { "word": "island", "meaning": "섬" },
+                { "word": "issue", "meaning": "문제, 발행하다" }, { "word": "item", "meaning": "항목" },
+                { "word": "jacket", "meaning": "재킷" }, { "word": "jam", "meaning": "잼" },
+                { "word": "jealous", "meaning": "질투하는" }, { "word": "jeans", "meaning": "청바지" },
+                { "word": "jet", "meaning": "제트기" }, { "word": "jewel", "meaning": "보석" },
+                { "word": "job", "meaning": "직업" }, { "word": "join", "meaning": "가입하다" },
+                { "word": "joke", "meaning": "농담" }, { "word": "journal", "meaning": "일기, 학술지" },
+                { "word": "journey", "meaning": "여행" }, { "word": "joy", "meaning": "기쁨" },
+                { "word": "judge", "meaning": "판사, 판단하다" }, { "word": "juice", "meaning": "주스" },
+                { "word": "jump", "meaning": "뛰다" }, { "word": "junior", "meaning": "연소자, 후배" },
+                { "word": "just", "meaning": "단지, 공정한" }, { "word": "keep", "meaning": "유지하다" },
+                { "word": "key", "meaning": "열쇠, 중요한" }, { "word": "kick", "meaning": "차다" },
+                { "word": "kid", "meaning": "아이" }, { "word": "kill", "meaning": "죽이다" }
+            ],
+            // Day 13
+            [
+                { "word": "kind", "meaning": "종류, 친절한" }, { "word": "king", "meaning": "왕" },
+                { "word": "kiss", "meaning": "키스하다" }, { "word": "kitchen", "meaning": "부엌" },
+                { "word": "knee", "meaning": "무릎" }, { "word": "knife", "meaning": "칼" },
+                { "word": "knock", "meaning": "두드리다" }, { "word": "know", "meaning": "알다" },
+                { "word": "knowledge", "meaning": "지식" }, { "word": "label", "meaning": "라벨" },
+                { "word": "labor", "meaning": "노동" }, { "word": "lack", "meaning": "부족" },
+                { "word": "lady", "meaning": "숙녀" }, { "word": "lake", "meaning": "호수" },
+                { "word": "lamp", "meaning": "램프" }, { "word": "land", "meaning": "땅, 착륙하다" },
+                { "word": "language", "meaning": "언어" }, { "word": "large", "meaning": "큰" },
+                { "word": "last", "meaning": "마지막의, 계속되다" }, { "word": "late", "meaning": "늦은" },
+                { "word": "laugh", "meaning": "웃다" }, { "word": "launch", "meaning": "시작하다, 발사하다" },
+                { "word": "law", "meaning": "법" }, { "word": "lawyer", "meaning": "변호사" },
+                { "word": "lay", "meaning": "놓다, 눕히다" }, { "word": "lazy", "meaning": "게으른" },
+                { "word": "lead", "meaning": "이끌다" }, { "word": "leader", "meaning": "지도자" },
+                { "word": "leaf", "meaning": "나뭇잎" }, { "word": "learn", "meaning": "배우다" },
+                { "word": "least", "meaning": "최소한" }, { "word": "leave", "meaning": "떠나다, 남기다" },
+                { "word": "lecture", "meaning": "강의" }, { "word": "left", "meaning": "왼쪽" },
+                { "word": "leg", "meaning": "다리" }, { "word": "legal", "meaning": "법적인" },
+                { "word": "lemon", "meaning": "레몬" }, { "word": "lend", "meaning": "빌려주다" },
+                { "word": "length", "meaning": "길이" }, { "word": "less", "meaning": "더 적은" },
+                { "word": "lesson", "meaning": "수업, 교훈" }, { "word": "let", "meaning": "허락하다" },
+                { "word": "letter", "meaning": "편지, 글자" }, { "word": "level", "meaning": "수준" },
+                { "word": "library", "meaning": "도서관" }, { "word": "lie", "meaning": "거짓말하다, 눕다" },
+                { "word": "life", "meaning": "삶" }, { "word": "lift", "meaning": "들어 올리다" }
+            ],
+            // Day 14
+            [
+                { "word": "light", "meaning": "빛, 가벼운" }, { "word": "like", "meaning": "좋아하다, ~처럼" },
+                { "word": "likely", "meaning": "~할 것 같은" }, { "word": "limit", "meaning": "제한하다" },
+                { "word": "line", "meaning": "선, 줄" }, { "word": "link", "meaning": "연결하다" },
+                { "word": "lion", "meaning": "사자" }, { "word": "lip", "meaning": "입술" },
+                { "word": "liquid", "meaning": "액체" }, { "word": "list", "meaning": "목록" },
+                { "word": "listen", "meaning": "듣다" }, { "word": "little", "meaning": "작은, 거의 없는" },
+                { "word": "live", "meaning": "살다" }, { "word": "load", "meaning": "짐을 싣다" },
+                { "word": "local", "meaning": "지역의" }, { "word": "locate", "meaning": "위치를 찾아내다" },
+                { "word": "lock", "meaning": "잠그다" }, { "word": "lonely", "meaning": "외로운" },
+                { "word": "long", "meaning": "긴" }, { "word": "look", "meaning": "보다" },
+                { "word": "lose", "meaning": "잃다" }, { "word": "loss", "meaning": "손실" },
+                { "word": "lot", "meaning": "많음" }, { "word": "loud", "meaning": "시끄러운" },
+                { "word": "love", "meaning": "사랑하다" }, { "word": "low", "meaning": "낮은" },
+                { "word": "luck", "meaning": "운" }, { "word": "lucky", "meaning": "운이 좋은" },
+                { "word": "lunch", "meaning": "점심" }, { "word": "machine", "meaning": "기계" },
+                { "word": "mad", "meaning": "화난, 미친" }, { "meaning": "잡지", "word": "magazine" },
+                { "word": "magic", "meaning": "마술" }, { "word": "mail", "meaning": "우편" },
+                { "word": "main", "meaning": "주요한" }, { "word": "maintain", "meaning": "유지하다" },
+                { "word": "major", "meaning": "주요한, 전공" }, { "word": "make", "meaning": "만들다" },
+                { "word": "male", "meaning": "남성의" }, { "word": "manage", "meaning": "관리하다" },
+                { "word": "manager", "meaning": "관리자" }, { "word": "many", "meaning": "많은" },
+                { "word": "map", "meaning": "지도" }, { "word": "march", "meaning": "행진하다, 3월" },
+                { "word": "mark", "meaning": "표시하다" }, { "word": "market", "meaning": "시장" },
+                { "word": "marry", "meaning": "결혼하다" }, { "word": "master", "meaning": "주인, 숙달하다" }
+            ],
+            // Day 15
+            [
+                { "word": "match", "meaning": "어울리다, 시합" }, { "word": "material", "meaning": "재료, 물질" },
+                { "word": "matter", "meaning": "문제, 중요하다" }, { "word": "may", "meaning": "~일지도 모른다, 5월" },
+                { "word": "maybe", "meaning": "아마도" }, { "word": "meal", "meaning": "식사" },
+                { "word": "mean", "meaning": "의미하다" }, { "word": "meaning", "meaning": "의미" },
+                { "word": "measure", "meaning": "측정하다" }, { "word": "meat", "meaning": "고기" },
+                { "word": "medal", "meaning": "메달" }, { "word": "media", "meaning": "미디어" },
+                { "word": "medical", "meaning": "의학의" }, { "word": "medicine", "meaning": "약" },
+                { "word": "medium", "meaning": "중간의" }, { "word": "meet", "meaning": "만나다" },
+                { "word": "melt", "meaning": "녹다" }, { "word": "member", "meaning": "회원" },
+                { "word": "memory", "meaning": "기억" }, { "word": "mental", "meaning": "정신의" },
+                { "word": "mention", "meaning": "언급하다" }, { "word": "menu", "meaning": "메뉴" },
+                { "word": "message", "meaning": "메시지" }, { "word": "metal", "meaning": "금속" },
+                { "word": "method", "meaning": "방법" }, { "word": "middle", "meaning": "중간" },
+                { "word": "midnight", "meaning": "자정" }, { "word": "might", "meaning": "~일지도 모른다" },
+                { "word": "mild", "meaning": "온화한" }, { "word": "mile", "meaning": "마일" },
+                { "word": "milk", "meaning": "우유" }, { "word": "million", "meaning": "백만" },
+                { "word": "mind", "meaning": "마음, 꺼리다" }, { "word": "mine", "meaning": "나의 것, 광산" },
+                { "word": "minute", "meaning": "분" }, { "word": "mirror", "meaning": "거울" },
+                { "word": "miss", "meaning": "놓치다, 그리워하다" }, { "word": "mistake", "meaning": "실수" },
+                { "word": "mix", "meaning": "섞다" }, { "word": "model", "meaning": "모델" },
+                { "word": "modern", "meaning": "현대의" }, { "word": "moment", "meaning": "순간" },
+                { "word": "money", "meaning": "돈" }, { "word": "monkey", "meaning": "원숭이" },
+                { "word": "month", "meaning": "달" }, { "word": "moon", "meaning": "달" },
+                { "word": "morning", "meaning": "아침" }, { "word": "mother", "meaning": "어머니" }
+            ],
+            // Day 16
+            [
+                { "word": "mountain", "meaning": "산" }, { "word": "mouse", "meaning": "쥐" },
+                { "word": "mouth", "meaning": "입" }, { "word": "move", "meaning": "움직이다, 이사하다" },
+                { "word": "movie", "meaning": "영화" }, { "word": "much", "meaning": "많은" },
+                { "word": "museum", "meaning": "박물관" }, { "word": "music", "meaning": "음악" },
+                { "word": "must", "meaning": "~해야 한다" }, { "word": "nail", "meaning": "손톱, 못" },
+                { "word": "name", "meaning": "이름" }, { "word": "narrow", "meaning": "좁은" },
+                { "word": "nation", "meaning": "국가" }, { "word": "national", "meaning": "국가의" },
+                { "word": "native", "meaning": "원주민의, 타고난" }, { "word": "natural", "meaning": "자연의" },
+                { "word": "nature", "meaning": "자연" }, { "word": "navy", "meaning": "해군" },
+                { "word": "near", "meaning": "가까운" }, { "word": "necessary", "meaning": "필요한" },
+                { "word": "neck", "meaning": "목" }, { "word": "need", "meaning": "필요하다" },
+                { "word": "negative", "meaning": "부정적인" }, { "word": "neighbor", "meaning": "이웃" },
+                { "word": "neither", "meaning": "어느 쪽도 아니다" }, { "word": "nervous", "meaning": "긴장한" },
+                { "word": "net", "meaning": "그물" }, { "word": "never", "meaning": "결코 ~않다" },
+                { "word": "new", "meaning": "새로운" }, { "word": "news", "meaning": "뉴스" },
+                { "word": "next", "meaning": "다음의" }, { "word": "nice", "meaning": "좋은" },
+                { "word": "night", "meaning": "밤" }, { "word": "noise", "meaning": "소음" },
+                { "word": "north", "meaning": "북쪽" }, { "word": "nose", "meaning": "코" },
+                { "word": "note", "meaning": "메모, 주목하다" }, { "word": "nothing", "meaning": "아무것도 없음" },
+                { "word": "notice", "meaning": "알아차리다, 공지" }, { "word": "novel", "meaning": "소설" },
+                { "word": "now", "meaning": "지금" }, { "word": "number", "meaning": "숫자" },
+                { "word": "nurse", "meaning": "간호사" }, { "word": "obey", "meaning": "복종하다" },
+                { "word": "object", "meaning": "물체, 반대하다" }, { "word": "observe", "meaning": "관찰하다" },
+                { "word": "ocean", "meaning": "대양" }, { "word": "off", "meaning": "떨어져" }
+            ],
+            // Day 17
+            [
+                { "word": "offer", "meaning": "제공하다" }, { "word": "office", "meaning": "사무실" },
+                { "word": "officer", "meaning": "장교, 공무원" }, { "word": "often", "meaning": "자주" },
+                { "word": "oil", "meaning": "기름" }, { "word": "old", "meaning": "늙은, 오래된" },
+                { "word": "once", "meaning": "한 번, 일단 ~하면" }, { "word": "one", "meaning": "하나" },
+                { "word": "only", "meaning": "오직" }, { "word": "open", "meaning": "열다" },
+                { "word": "operate", "meaning": "작동하다, 수술하다" }, { "word": "opinion", "meaning": "의견" },
+                { "word": "opportunity", "meaning": "기회" }, { "word": "opposite", "meaning": "반대의" },
+                { "word": "order", "meaning": "주문하다, 순서" }, { "word": "ordinary", "meaning": "보통의" },
+                { "word": "organization", "meaning": "조직" }, { "word": "original", "meaning": "원래의" },
+                { "word": "other", "meaning": "다른" }, { "word": "out", "meaning": "밖에" },
+                { "word": "outside", "meaning": "바깥쪽" }, { "word": "over", "meaning": "~위에, 끝난" },
+                { "word": "overcome", "meaning": "극복하다" }, { "word": "owe", "meaning": "빚지다" },
+                { "word": "own", "meaning": "소유하다" }, { "word": "owner", "meaning": "소유자" },
+                { "word": "pack", "meaning": "싸다" }, { "word": "package", "meaning": "소포" },
+                { "word": "page", "meaning": "페이지" }, { "word": "pain", "meaning": "고통" },
+                { "word": "paint", "meaning": "그리다, 페인트" }, { "word": "pair", "meaning": "한 쌍" },
+                { "word": "palace", "meaning": "궁전" }, { "word": "pants", "meaning": "바지" },
+                { "word": "paper", "meaning": "종이" }, { "word": "pardon", "meaning": "용서" },
+                { "word": "parent", "meaning": "부모" }, { "word": "park", "meaning": "공원, 주차하다" },
+                { "word": "part", "meaning": "부분" }, { "word": "participate", "meaning": "참가하다" },
+                { "word": "party", "meaning": "파티, 정당" }, { "word": "pass", "meaning": "지나가다, 합격하다" },
+                { "word": "passenger", "meaning": "승객" }, { "word": "passport", "meaning": "여권" },
+                { "word": "past", "meaning": "과거" }, { "word": "path", "meaning": "길" },
+                { "word": "patient", "meaning": "환자, 인내심 있는" }, { "word": "pattern", "meaning": "패턴" },
+                { "word": "pause", "meaning": "잠시 멈추다" }, { "word": "pay", "meaning": "지불하다" }
+            ],
+            // Day 18
+            [
+                { "word": "peace", "meaning": "평화" }, { "word": "pen", "meaning": "펜" },
+                { "word": "pencil", "meaning": "연필" }, { "word": "people", "meaning": "사람들" },
+                { "word": "percent", "meaning": "퍼센트" }, { "word": "perfect", "meaning": "완벽한" },
+                { "word": "perform", "meaning": "공연하다, 수행하다" }, { "word": "performance", "meaning": "공연, 성과" },
+                { "word": "perhaps", "meaning": "아마도" }, { "word": "period", "meaning": "기간" },
+                { "word": "person", "meaning": "사람" }, { "word": "personal", "meaning": "개인의" },
+                { "word": "pet", "meaning": "애완동물" }, { "word": "phone", "meaning": "전화" },
+                { "word": "photo", "meaning": "사진" }, { "word": "piano", "meaning": "피아노" },
+                { "word": "pick", "meaning": "고르다" }, { "word": "picnic", "meaning": "소풍" },
+                { "word": "picture", "meaning": "그림, 사진" }, { "word": "piece", "meaning": "조각" },
+                { "word": "pig", "meaning": "돼지" }, { "word": "pilot", "meaning": "조종사" },
+                { "word": "pin", "meaning": "핀" }, { "word": "pink", "meaning": "분홍색" },
+                { "word": "pipe", "meaning": "파이프" }, { "word": "pity", "meaning": "연민" },
+                { "word": "place", "meaning": "장소, 놓다" }, { "word": "plan", "meaning": "계획" },
+                { "word": "plane", "meaning": "비행기" }, { "word": "planet", "meaning": "행성" },
+                { "word": "plant", "meaning": "식물, 심다" }, { "word": "plastic", "meaning": "플라스틱" },
+                { "word": "plate", "meaning": "접시" }, { "word": "play", "meaning": "놀다, 연주하다" },
+                { "word": "player", "meaning": "선수" }, { "word": "please", "meaning": "제발, 기쁘게 하다" },
+                { "word": "pleasure", "meaning": "기쁨" }, { "word": "pocket", "meaning": "주머니" },
+                { "word": "poem", "meaning": "시" }, { "word": "point", "meaning": "점, 가리키다" },
+                { "word": "poison", "meaning": "독" }, { "word": "police", "meaning": "경찰" },
+                { "word": "policy", "meaning": "정책" }, { "word": "polite", "meaning": "공손한" },
+                { "word": "pollute", "meaning": "오염시키다" }, { "word": "pool", "meaning": "수영장" },
+                { "word": "poor", "meaning": "가난한, 불쌍한" }, { "word": "popular", "meaning": "인기 있는" }
+            ],
+            // Day 19
+            [
+                { "word": "population", "meaning": "인구" }, { "word": "port", "meaning": "항구" },
+                { "word": "position", "meaning": "위치" }, { "word": "positive", "meaning": "긍정적인" },
+                { "word": "possible", "meaning": "가능한" }, { "word": "post", "meaning": "우편, 게시하다" },
+                { "word": "postcard", "meaning": "엽서" }, { "word": "pot", "meaning": "냄비" },
+                { "word": "potato", "meaning": "감자" }, { "word": "pound", "meaning": "파운드" },
+                { "word": "pour", "meaning": "붓다" }, { "word": "power", "meaning": "힘" },
+                { "word": "practice", "meaning": "연습하다" }, { "word": "praise", "meaning": "칭찬하다" },
+                { "word": "pray", "meaning": "기도하다" }, { "word": "predict", "meaning": "예측하다" },
+                { "word": "prefer", "meaning": "선호하다" }, { "word": "prepare", "meaning": "준비하다" },
+                { "word": "present", "meaning": "선물, 현재, 발표하다" }, { "word": "president", "meaning": "대통령" },
+                { "word": "press", "meaning": "누르다, 언론" }, { "word": "pressure", "meaning": "압력" },
+                { "word": "pretty", "meaning": "예쁜, 꽤" }, { "word": "prevent", "meaning": "막다, 예방하다" },
+                { "word": "price", "meaning": "가격" }, { "word": "pride", "meaning": "자부심" },
+                { "word": "prince", "meaning": "왕자" }, { "word": "principal", "meaning": "교장, 주요한" },
+                { "word": "print", "meaning": "인쇄하다" }, { "word": "prison", "meaning": "감옥" },
+                { "word": "private", "meaning": "사적인" }, { "word": "prize", "meaning": "상" },
+                { "word": "problem", "meaning": "문제" }, { "word": "process", "meaning": "과정" },
+                { "word": "produce", "meaning": "생산하다" }, { "word": "product", "meaning": "제품" },
+                { "word": "profession", "meaning": "직업" }, { "word": "professor", "meaning": "교수" },
+                { "word": "profit", "meaning": "이익" }, { "word": "program", "meaning": "프로그램" },
+                { "word": "progress", "meaning": "진보" }, { "word": "project", "meaning": "프로젝트" },
+                { "word": "promise", "meaning": "약속하다" }, { "word": "pronounce", "meaning": "발음하다" },
+                { "word": "proof", "meaning": "증거" }, { "word": "protect", "meaning": "보호하다" },
+                { "word": "proud", "meaning": "자랑스러운" }, { "word": "prove", "meaning": "증명하다" }
+            ],
+            // Day 20
+            [
+                { "word": "provide", "meaning": "제공하다" }, { "word": "public", "meaning": "대중의" },
+                { "word": "publish", "meaning": "출판하다" }, { "word": "pull", "meaning": "당기다" },
+                { "word": "pump", "meaning": "펌프" }, { "word": "punish", "meaning": "처벌하다" },
+                { "word": "purple", "meaning": "보라색" }, { "word": "purpose", "meaning": "목적" },
+                { "word": "push", "meaning": "밀다" }, { "word": "put", "meaning": "놓다" },
+                { "word": "puzzle", "meaning": "퍼즐" }, { "word": "quality", "meaning": "질" },
+                { "word": "quantity", "meaning": "양" }, { "word": "quarter", "meaning": "4분의 1" },
+                { "word": "queen", "meaning": "여왕" }, { "word": "question", "meaning": "질문" },
+                { "word": "quick", "meaning": "빠른" }, { "word": "quiet", "meaning": "조용한" },
+                { "word": "quit", "meaning": "그만두다" }, { "word": "quite", "meaning": "꽤" },
+                { "word": "quiz", "meaning": "퀴즈" }, { "word": "race", "meaning": "경주, 인종" },
+                { "word": "radio", "meaning": "라디오" }, { "word": "rail", "meaning": "철도" },
+                { "word": "rain", "meaning": "비" }, { "word": "raise", "meaning": "올리다, 기르다" },
+                { "word": "rank", "meaning": "계급" }, { "word": "rapid", "meaning": "빠른" },
+                { "word": "rate", "meaning": "비율, 요금" }, { "word": "rather", "meaning": "오히려" },
+                { "word": "reach", "meaning": "도달하다" }, { "word": "read", "meaning": "읽다" },
+                { "word": "ready", "meaning": "준비된" }, { "word": "real", "meaning": "실제의" },
+                { "word": "realize", "meaning": "깨닫다" }, { "word": "reason", "meaning": "이유" },
+                { "word": "receive", "meaning": "받다" }, { "word": "recent", "meaning": "최근의" },
+                { "word": "recipe", "meaning": "요리법" }, { "word": "recognize", "meaning": "인지하다" },
+                { "word": "recommend", "meaning": "추천하다" }, { "word": "record", "meaning": "기록하다" },
+                { "word": "recover", "meaning": "회복하다" }, { "word": "recycle", "meaning": "재활용하다" },
+                { "word": "red", "meaning": "빨간색" }, { "word": "reduce", "meaning": "줄이다" },
+                { "word": "refuse", "meaning": "거절하다" }, { "word": "regard", "meaning": "여기다" },
+                { "word": "regular", "meaning": "규칙적인" }, { "word": "reject", "meaning": "거절하다" }
+            ],
+            // Day 21
+            [
+                { "word": "relation", "meaning": "관계" }, { "word": "relax", "meaning": "쉬다" },
+                { "word": "release", "meaning": "풀어주다, 발표하다" }, { "word": "religion", "meaning": "종교" },
+                { "word": "remain", "meaning": "남아있다" }, { "word": "remember", "meaning": "기억하다" },
+                { "word": "remind", "meaning": "상기시키다" }, { "word": "remove", "meaning": "제거하다" },
+                { "word": "rent", "meaning": "빌리다" }, { "word": "repair", "meaning": "수리하다" },
+                { "word": "repeat", "meaning": "반복하다" }, { "word": "replace", "meaning": "대체하다" },
+                { "word": "reply", "meaning": "대답하다" }, { "word": "report", "meaning": "보고하다" },
+                { "word": "represent", "meaning": "대표하다" }, { "word": "request", "meaning": "요청하다" },
+                { "word": "require", "meaning": "요구하다" }, { "word": "rescue", "meaning": "구조하다" },
+                { "word": "research", "meaning": "연구" }, { "word": "respect", "meaning": "존경하다" },
+                { "word": "respond", "meaning": "응답하다" }, { "word": "response", "meaning": "응답" },
+                { "word": "responsible", "meaning": "책임감 있는" }, { "word": "rest", "meaning": "휴식, 나머지" },
+                { "word": "restaurant", "meaning": "식당" }, { "word": "result", "meaning": "결과" },
+                { "word": "return", "meaning": "돌아오다" }, { "word": "review", "meaning": "복습, 검토" },
+                { "word": "reward", "meaning": "보상" }, { "word": "rhythm", "meaning": "리듬" },
+                { "word": "rice", "meaning": "쌀, 밥" }, { "word": "rich", "meaning": "부유한" },
+                { "word": "ride", "meaning": "타다" }, { "word": "right", "meaning": "오른쪽, 옳은" },
+                { "word": "ring", "meaning": "반지, 울리다" }, { "word": "rise", "meaning": "오르다" },
+                { "word": "risk", "meaning": "위험" }, { "word": "river", "meaning": "강" },
+                { "word": "road", "meaning": "도로" }, { "word": "robot", "meaning": "로봇" },
+                { "word": "rock", "meaning": "바위, 흔들다" }, { "word": "role", "meaning": "역할" },
+                { "word": "roll", "meaning": "구르다" }, { "word": "roof", "meaning": "지붕" },
+                { "word": "room", "meaning": "방, 공간" }, { "word": "root", "meaning": "뿌리" },
+                { "word": "rope", "meaning": "밧줄" }, { "word": "rose", "meaning": "장미" }
+            ],
+            // Day 22
+            [
+                { "word": "rough", "meaning": "거친" }, { "word": "round", "meaning": "둥근" },
+                { "word": "royal", "meaning": "왕의" }, { "word": "rub", "meaning": "문지르다" },
+                { "word": "rubber", "meaning": "고무" }, { "word": "rude", "meaning": "무례한" },
+                { "word": "rule", "meaning": "규칙, 지배하다" }, { "word": "run", "meaning": "달리다" },
+                { "word": "rush", "meaning": "돌진하다" }, { "word": "sad", "meaning": "슬픈" },
+                { "word": "safe", "meaning": "안전한" }, { "word": "safety", "meaning": "안전" },
+                { "word": "sail", "meaning": "항해하다" }, { "word": "salad", "meaning": "샐러드" },
+                { "word": "salary", "meaning": "급여" }, { "word": "sale", "meaning": "판매" },
+                { "word": "salt", "meaning": "소금" }, { "word": "same", "meaning": "같은" },
+                { "word": "sand", "meaning": "모래" }, { "word": "satisfy", "meaning": "만족시키다" },
+                { "word": "save", "meaning": "구하다, 저축하다" }, { "word": "say", "meaning": "말하다" },
+                { "word": "scare", "meaning": "겁주다" }, { "word": "scene", "meaning": "장면" },
+                { "word": "scent", "meaning": "향기" }, { "word": "schedule", "meaning": "일정" },
+                { "word": "school", "meaning": "학교" }, { "word": "science", "meaning": "과학" },
+                { "word": "scientist", "meaning": "과학자" }, { "word": "scissors", "meaning": "가위" },
+                { "word": "score", "meaning": "점수" }, { "word": "scream", "meaning": "비명을 지르다" },
+                { "word": "screen", "meaning": "화면" }, { "word": "sea", "meaning": "바다" },
+                { "word": "search", "meaning": "찾다" }, { "word": "season", "meaning": "계절" },
+                { "word": "seat", "meaning": "좌석" }, { "word": "second", "meaning": "두 번째의, 초" },
+                { "word": "secret", "meaning": "비밀" }, { "word": "section", "meaning": "부분, 구역" },
+                { "word": "see", "meaning": "보다" }, { "word": "seed", "meaning": "씨앗" },
+                { "word": "seek", "meaning": "찾다, 추구하다" }, { "word": "seem", "meaning": "~처럼 보이다" },
+                { "word": "select", "meaning": "선택하다" }, { "word": "sell", "meaning": "팔다" },
+                { "word": "send", "meaning": "보내다" }, { "word": "sense", "meaning": "감각" }
+            ],
+            // Day 23
+            [
+                { "word": "sentence", "meaning": "문장, 선고하다" }, { "word": "separate", "meaning": "분리된" },
+                { "word": "serious", "meaning": "심각한, 진지한" }, { "word": "servant", "meaning": "하인" },
+                { "word": "serve", "meaning": "제공하다, 봉사하다" }, { "word": "service", "meaning": "서비스" },
+                { "word": "set", "meaning": "놓다, 설정하다" }, { "word": "settle", "meaning": "정착하다, 해결하다" },
+                { "word": "several", "meaning": "몇몇의" }, { "word": "sew", "meaning": "바느질하다" },
+                { "word": "shake", "meaning": "흔들다" }, { "word": "shall", "meaning": "~일 것이다" },
+                { "word": "shallow", "meaning": "얕은" }, { "word": "shame", "meaning": "부끄러움" },
+                { "word": "shape", "meaning": "모양" }, { "word": "share", "meaning": "공유하다" },
+                { "word": "sharp", "meaning": "날카로운" }, { "word": "she", "meaning": "그녀" },
+                { "word": "sheep", "meaning": "양" }, { "word": "sheet", "meaning": "시트, 한 장" },
+                { "word": "shelf", "meaning": "선반" }, { "word": "shine", "meaning": "빛나다" },
+                { "word": "ship", "meaning": "배" }, { "word": "shirt", "meaning": "셔츠" },
+                { "word": "shock", "meaning": "충격" }, { "word": "shoe", "meaning": "신발" },
+                { "word": "shoot", "meaning": "쏘다" }, { "word": "shop", "meaning": "가게" },
+                { "word": "short", "meaning": "짧은" }, { "word": "shot", "meaning": "발사, 슛" },
+                { "word": "should", "meaning": "~해야 한다" }, { "word": "shoulder", "meaning": "어깨" },
+                { "word": "shout", "meaning": "소리치다" }, { "word": "show", "meaning": "보여주다" },
+                { "word": "shower", "meaning": "샤워" }, { "word": "shut", "meaning": "닫다" },
+                { "word": "shy", "meaning": "부끄러워하는" }, { "word": "sick", "meaning": "아픈" },
+                { "word": "side", "meaning": "쪽, 면" }, { "word": "sight", "meaning": "시력, 광경" },
+                { "word": "sign", "meaning": "표지판, 서명하다" }, { "word": "signal", "meaning": "신호" },
+                { "word": "silence", "meaning": "침묵" }, { "word": "silent", "meaning": "조용한" },
+                { "word": "silly", "meaning": "어리석은" }, { "word": "silver", "meaning": "은" },
+                { "word": "similar", "meaning": "비슷한" }, { "word": "simple", "meaning": "간단한" }
+            ],
+            // Day 24
+            [
+                { "word": "since", "meaning": "~이래로, ~때문에" }, { "word": "sing", "meaning": "노래하다" },
+                { "word": "single", "meaning": "단 하나의, 독신의" }, { "word": "sink", "meaning": "가라앉다, 싱크대" },
+                { "word": "sister", "meaning": "자매" }, { "word": "sit", "meaning": "앉다" },
+                { "word": "site", "meaning": "장소, 부지" }, { "word": "situation", "meaning": "상황" },
+                { "word": "size", "meaning": "크기" }, { "word": "skill", "meaning": "기술" },
+                { "word": "skin", "meaning": "피부" }, { "word": "skirt", "meaning": "치마" },
+                { "word": "sky", "meaning": "하늘" }, { "word": "sleep", "meaning": "자다" },
+                { "word": "slice", "meaning": "얇은 조각" }, { "word": "slide", "meaning": "미끄러지다" },
+                { "word": "slight", "meaning": "약간의" }, { "word": "slow", "meaning": "느린" },
+                { "word": "small", "meaning": "작은" }, { "word": "smart", "meaning": "똑똑한" },
+                { "word": "smell", "meaning": "냄새 맡다" }, { "word": "smile", "meaning": "미소 짓다" },
+                { "word": "smoke", "meaning": "연기, 담배 피우다" }, { "word": "smooth", "meaning": "부드러운" },
+                { "word": "snack", "meaning": "간식" }, { "word": "snake", "meaning": "뱀" },
+                { "word": "snow", "meaning": "눈" }, { "word": "soap", "meaning": "비누" },
+                { "word": "soccer", "meaning": "축구" }, { "word": "social", "meaning": "사회의" },
+                { "word": "society", "meaning": "사회" }, { "word": "sock", "meaning": "양말" },
+                { "word": "soft", "meaning": "부드러운" }, { "word": "software", "meaning": "소프트웨어" },
+                { "word": "soil", "meaning": "흙" }, { "word": "soldier", "meaning": "군인" },
+                { "word": "solid", "meaning": "고체의, 단단한" }, { "word": "solve", "meaning": "풀다, 해결하다" },
+                { "word": "some", "meaning": "몇몇의" }, { "word": "son", "meaning": "아들" },
+                { "word": "song", "meaning": "노래" }, { "word": "soon", "meaning": "곧" },
+                { "word": "sorry", "meaning": "미안한" }, { "word": "sort", "meaning": "종류, 분류하다" },
+                { "word": "soul", "meaning": "영혼" }, { "word": "sound", "meaning": "소리, ~처럼 들리다" },
+                { "word": "soup", "meaning": "수프" }, { "word": "sour", "meaning": "신" }
+            ],
+            // Day 25
+            [
+                { "word": "source", "meaning": "근원" }, { "word": "south", "meaning": "남쪽" },
+                { "word": "space", "meaning": "공간, 우주" }, { "word": "speak", "meaning": "말하다" },
+                { "word": "special", "meaning": "특별한" }, { "word": "speech", "meaning": "연설" },
+                { "word": "speed", "meaning": "속도" }, { "word": "spell", "meaning": "철자를 쓰다" },
+                { "word": "spend", "meaning": "쓰다, 보내다" }, { "word": "spirit", "meaning": "정신, 영혼" },
+                { "word": "spoon", "meaning": "숟가락" }, { "word": "sport", "meaning": "스포츠" },
+                { "word": "spot", "meaning": "장소, 점" }, { "word": "spread", "meaning": "퍼지다" },
+                { "word": "spring", "meaning": "봄, 용수철" }, { "word": "square", "meaning": "정사각형, 광장" },
+                { "word": "stage", "meaning": "무대, 단계" }, { "word": "stamp", "meaning": "우표, 도장" },
+                { "word": "stand", "meaning": "서다" }, { "word": "standard", "meaning": "표준" },
+                { "word": "star", "meaning": "별" }, { "word": "start", "meaning": "시작하다" },
+                { "word": "state", "meaning": "상태, 주, 진술하다" }, { "word": "station", "meaning": "역, 정거장" },
+                { "word": "stay", "meaning": "머무르다" }, { "word": "steal", "meaning": "훔치다" },
+                { "word": "steam", "meaning": "증기" }, { "word": "step", "meaning": "걸음, 단계" },
+                { "word": "stick", "meaning": "막대기, 붙이다" }, { "word": "still", "meaning": "여전히" },
+                { "word": "stomach", "meaning": "위, 배" }, { "word": "stone", "meaning": "돌" },
+                { "word": "stop", "meaning": "멈추다" }, { "word": "store", "meaning": "가게, 저장하다" },
+                { "word": "storm", "meaning": "폭풍" }, { "word": "story", "meaning": "이야기" },
+                { "word": "straight", "meaning": "곧은" }, { "word": "strange", "meaning": "이상한" },
+                { "word": "street", "meaning": "거리" }, { "word": "stress", "meaning": "스트레스, 강조하다" },
+                { "word": "stretch", "meaning": "뻗다" }, { "word": "strike", "meaning": "치다, 파업" },
+                { "word": "string", "meaning": "끈" }, { "word": "strong", "meaning": "강한" },
+                { "word": "structure", "meaning": "구조" }, { "word": "student", "meaning": "학생" },
+                { "word": "study", "meaning": "공부하다" }, { "word": "stupid", "meaning": "어리석은" },
+                { "word": "style", "meaning": "스타일" }, { "word": "subject", "meaning": "과목, 주제" }
+            ]
+        ];
+
+        function createShuffledVocabulary() {
+            const allWords = originalVocabulary.flat();
+            for (let i = allWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+            }
+            const shuffledVocab = [];
+            for (let i = 0; i < allWords.length; i += 50) {
+                shuffledVocab.push(allWords.slice(i, i + 50));
+            }
+            return shuffledVocab;
+        }
+
+        const vocabulary = createShuffledVocabulary();
+        const daySelector = document.getElementById('day-selector');
+        const wordSection = document.getElementById('word-section');
+        const wordListTitle = document.getElementById('word-list-title');
+        const wordList = document.getElementById('word-list');
+        const startTestBtn = document.getElementById('start-test-btn');
+        const testModal = document.getElementById('test-modal');
+        const testContent = document.getElementById('test-content');
+        const resultContent = document.getElementById('result-content');
+        const testTitle = document.getElementById('test-title');
+        const testFormContainer = document.getElementById('test-form-container');
+        const gradeTestBtn = document.getElementById('grade-test-btn');
+        const closeTestBtn = document.getElementById('close-test-btn');
+        const scoreDisplay = document.getElementById('score-display');
+        const scoreMessage = document.getElementById('score-message');
+        const sendResultBtn = document.getElementById('send-result-btn');
+        const closeResultBtn = document.getElementById('close-result-btn');
+
+        let currentDay = -1;
+        let testWords = [];
+        let score = 0;
+
+        function createDayButtons() {
+            for (let i = 0; i < vocabulary.length; i++) {
+                const day = i + 1;
+                const button = document.createElement('button');
+                button.textContent = `Day ${day}`;
+                button.className = 'p-2 border rounded-lg text-center transition-colors duration-200 font-medium bg-white text-blue-500 border-gray-300 hover:bg-blue-100';
+                button.dataset.day = day;
+                button.addEventListener('click', () => selectDay(day));
+                daySelector.appendChild(button);
+            }
+        }
+
+        function selectDay(day) {
+            currentDay = day;
+            wordListTitle.textContent = `Day ${day} 단어`;
+            document.querySelectorAll('#day-selector button').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                btn.classList.add('bg-white', 'text-blue-500', 'border-gray-300', 'hover:bg-blue-100');
+            });
+            const selectedBtn = document.querySelector(`#day-selector button[data-day='${day}']`);
+            selectedBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+            selectedBtn.classList.remove('bg-white', 'text-blue-500', 'border-gray-300', 'hover:bg-blue-100');
+            displayWords(day);
+            wordSection.classList.remove('hidden');
+        }
+
+        function displayWords(day) {
+            wordList.innerHTML = '';
+            const words = vocabulary[day - 1];
+            words.forEach(wordData => {
+                const card = document.createElement('div');
+                card.className = 'relative p-4 border rounded-lg shadow-sm cursor-pointer h-24 flex items-center justify-center';
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-flip w-full h-full';
+                const front = document.createElement('div');
+                front.className = 'card-front absolute w-full h-full flex items-center justify-center bg-white rounded-lg';
+                front.innerHTML = `<span class="text-xl font-semibold">${wordData.word}</span>`;
+                const back = document.createElement('div');
+                back.className = 'card-back absolute w-full h-full flex items-center justify-center bg-blue-100 rounded-lg';
+                back.innerHTML = `<span class="text-xl font-bold text-blue-800">${wordData.meaning}</span>`;
+                cardInner.appendChild(front);
+                cardInner.appendChild(back);
+                card.appendChild(cardInner);
+                card.addEventListener('click', () => cardInner.classList.toggle('is-flipped'));
+                wordList.appendChild(card);
+            });
+        }
+
+        function startTest() {
+            const dayWords = [...vocabulary[currentDay - 1]];
+            for (let i = dayWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [dayWords[i], dayWords[j]] = [dayWords[j], dayWords[i]];
+            }
+            testWords = dayWords.slice(0, 30);
+            score = 0;
+            testTitle.textContent = `Day ${currentDay} 단어 테스트`;
+            displayTestForm();
+            testModal.classList.remove('hidden');
+            testContent.classList.remove('hidden');
+            resultContent.classList.add('hidden');
+        }
+        
+        function displayTestForm() {
+            testFormContainer.innerHTML = '';
+            testWords.forEach((wordData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'grid grid-cols-[1fr_2fr] gap-4 items-center';
+                const label = document.createElement('label');
+                label.className = 'text-lg font-semibold text-right';
+                label.textContent = wordData.word;
+                label.htmlFor = `answer-${index}`;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `answer-${index}`;
+                input.className = 'test-answer-input w-full p-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500';
+                input.dataset.index = index;
+                questionDiv.appendChild(label);
+                questionDiv.appendChild(input);
+                testFormContainer.appendChild(questionDiv);
+            });
+        }
+
+        function gradeTest() {
+            score = 0;
+            const answerInputs = document.querySelectorAll('.test-answer-input');
+            answerInputs.forEach(input => {
+                const index = parseInt(input.dataset.index, 10);
+                const userAnswer = input.value.trim();
+                const correctAnswer = testWords[index].meaning;
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+            showResults();
+        }
+
+        function showResults() {
+            testContent.classList.add('hidden');
+            resultContent.classList.remove('hidden');
+            const totalQuestions = testWords.length;
+            scoreDisplay.textContent = `${score} / ${totalQuestions}`;
+            if (score === totalQuestions) {
+                scoreMessage.textContent = "🎉 완벽해요! 모든 문제를 맞혔습니다.";
+                scoreDisplay.classList.add('text-green-500');
+                scoreDisplay.classList.remove('text-red-500');
+            } else {
+                scoreMessage.textContent = `아쉬워요! ${totalQuestions - score}개 틀렸습니다. 다시 도전해보세요.`;
+                scoreDisplay.classList.add('text-red-500');
+                scoreDisplay.classList.remove('text-green-500');
+            }
+            sendResultBtn.disabled = false;
+            sendResultBtn.textContent = '결과 전송하기';
+        }
+
+        function sendResultToSheet() {
+            if (SCRIPT_URL.includes("여기에")) {
+                alert("오류: 선생님의 구글 시트 URL이 코드에 입력되지 않았습니다.");
+                return;
+            }
+
+            sendResultBtn.disabled = true;
+            sendResultBtn.textContent = '전송 중...';
+
+            const payload = {
+                day: currentDay,
+                score: `${score} / ${testWords.length}`
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // CORS 에러를 방지하기 위함
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                sendResultBtn.textContent = '전송 완료!';
+                sendResultBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                sendResultBtn.classList.add('bg-green-500');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sendResultBtn.textContent = '전송 실패';
+                sendResultBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                sendResultBtn.classList.add('bg-red-500');
+                setTimeout(() => {
+                    sendResultBtn.disabled = false;
+                    sendResultBtn.textContent = '다시 시도';
+                    sendResultBtn.classList.remove('bg-red-500');
+                    sendResultBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+            });
+        }
+
+        function closeTest() {
+            testModal.classList.add('hidden');
+        }
+
+        startTestBtn.addEventListener('click', startTest);
+        gradeTestBtn.addEventListener('click', gradeTest);
+        closeTestBtn.addEventListener('click', closeTest);
+        closeResultBtn.addEventListener('click', closeTest);
+        sendResultBtn.addEventListener('click', sendResultToSheet);
+
+        createDayButtons();
+    </script>
+</body>
+</html>
